@@ -7,7 +7,7 @@ import {
   useRouter,
 } from '@tanstack/react-router'
 import { useRef, useState, type FormEvent } from 'react'
-import type { Database } from '../../../lib/supabase/types'
+import type { Database } from '../../lib/supabase/types'
 
 type PropertyInsert = Database['public']['Tables']['properties']['Insert']
 type PropertyFormInput = {
@@ -69,7 +69,7 @@ const createProperty = createServerFn({ method: 'POST' })
   .validator(validatePropertyInput)
   .handler(async ({ data }) => {
     const { createServerSupabaseClient } =
-      await import('../../../lib/supabase.server')
+      await import('../../lib/supabase.server')
     const { supabase, user } = await createServerSupabaseClient()
 
     if (!user) {
