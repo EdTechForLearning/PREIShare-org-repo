@@ -11,7 +11,7 @@ The PREIshare sponsor requirements require server/database enforcement of sponso
 | Variable | Safe in browser? | Purpose and handling |
 |---|---|---|
 | `VITE_SUPABASE_URL` | Yes; public configuration | The Supabase project URL. The `VITE_` prefix makes it available to browser code. It does not grant data access by itself. |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Yes; public configuration | The Supabase publishable key used by the browser client. Treat it as public, not as a password or authorization boundary. Auth and RLS must protect private data. |
+| `VITE_SUPABASE_ANON_KEY` | Yes; public configuration | The Supabase anon key used by the browser client. Treat it as public, not as a password or authorization boundary. Auth and RLS must protect private data. |
 | `SUPABASE_SECRET_KEY` | **No; server-only and optional** | A privileged key for trusted server operations only, if such an operation is actually required. Never add a `VITE_` prefix, import it into browser code, or use it for ordinary sponsor-scoped listing reads or writes. Privileged access may bypass RLS. |
 
 `.env.example` contains illustrative placeholders only. Replace them only in a private local or deployment environment; never put real project values, passwords, tokens, or keys in this document or the example template.
@@ -30,7 +30,7 @@ Restart the development server after changing environment variables so the appli
 
 ## 4. Keep privileged keys out of browser code
 
-- Browser code may use `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`.
+- Browser code may use `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
 - Never read `SUPABASE_SECRET_KEY` from React components, route UI, browser utilities, or any module included in a client bundle.
 - Do not pass a secret through component props, loader data, server-function return values, HTML, or browser-visible error messages.
 - Keep server-only operations in server-only modules and access privileged configuration only inside trusted server execution, if required.
@@ -54,7 +54,7 @@ Expected: real environment files are ignored and are not listed as tracked files
 ## 6. Vercel Production environment
 
 1. In the Vercel project, open **Settings → Environment Variables**.
-2. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` with the values for the intended Supabase project. Set their availability for **Production** (and configure Preview/Development separately only when those environments are intended to use them).
+2. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` with the values for the intended Supabase project. Set their availability for **Production** (and configure Preview/Development separately only when those environments are intended to use them).
 3. Add `SUPABASE_SECRET_KEY` only if a reviewed trusted server-side operation needs it. Keep the name exactly server-only, do not prefix it with `VITE_`, and restrict its environment scope to the environments that require it.
 4. Do not put secret keys in build-time client configuration, Vercel client-visible settings, source code, or browser-exposed variables. Confirm the application accesses any privileged value only in server-only runtime code.
 5. Redeploy after changing environment variables. Verify the deployed application uses the expected project and review generated browser assets for accidental secret exposure.
@@ -65,7 +65,7 @@ The current sponsor-scoped Auth and listing operations do not require `SUPABASE_
 
 - [ ] `.env.example` contains placeholders only and no real project values.
 - [ ] `.env.local`, `.env.production`, and other real `.env.*` files are ignored and are not tracked.
-- [ ] Browser code uses only the Supabase URL and publishable key.
+- [ ] Browser code uses only `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
 - [ ] No server-only module or secret key is imported into a browser-facing route, shared component, or client utility.
 - [ ] Any optional privileged key has a documented server-only use and is not used for normal sponsor-scoped listing operations.
 - [ ] Signup/login establishes an authenticated user identity; invalid credentials do not grant access.
