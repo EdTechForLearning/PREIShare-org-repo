@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import type { Database } from '../../lib/supabase/types'
 
 type Property = Pick<
@@ -77,15 +77,25 @@ function PropertiesPage() {
   return (
     <section aria-labelledby="properties-title" className="space-y-5">
       <header>
-        <p className="island-kicker text-sm font-semibold uppercase tracking-wide">
-          Sponsor portfolio
-        </p>
-        <h1
-          className="mt-1 text-2xl font-bold text-[var(--sea-ink)]"
-          id="properties-title"
-        >
-          Properties
-        </h1>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="island-kicker text-sm font-semibold uppercase tracking-wide">
+              Sponsor portfolio
+            </p>
+            <h1
+              className="mt-1 text-2xl font-bold text-[var(--sea-ink)]"
+              id="properties-title"
+            >
+              Properties
+            </h1>
+          </div>
+          <Link
+            className="inline-flex rounded-full bg-[var(--palm)] px-5 py-3 text-sm font-semibold text-white no-underline transition hover:opacity-90"
+            to="/dashboard/properties/new"
+          >
+            Add Property
+          </Link>
+        </div>
       </header>
 
       {properties.length === 0 ? (
