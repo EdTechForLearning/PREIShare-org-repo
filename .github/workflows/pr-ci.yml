@@ -1,7 +1,9 @@
-# Scaffold only. Typecheck, build, lint, and test are later steps.
+# Install, then typecheck, then build. Lint and test are later steps.
 # docs/ci/project-ci-inventory.md does not pin a Node version (no .nvmrc, no engines).
 # This file records Node 24, the Active LTS when the workflow was added.
 # Package manager is npm. Lockfile is package-lock.json. Do not use pnpm or yarn.
+# Script names from the inventory: `typecheck` (`tsc --noEmit`), then `build` (`vite build`).
+# Do not use continue-on-error. Lint and test are not scripts yet.
 
 name: PR CI
 
@@ -12,7 +14,7 @@ on:
 
 jobs:
   ci:
-    name: Install dependencies
+    name: Install, typecheck, and build
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -26,3 +28,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
