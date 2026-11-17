@@ -45,7 +45,7 @@ I am intentionally not editing application code while building this map.
 | `.cta.json` | config | TanStack CLI scaffold metadata | yes |
 | `.cursorrules` | config | Cursor rules for editing this codebase | yes |
 
-No `apps/`, `packages/`, or `.github/` directories exist at the root.
+No `apps/` or `packages/` directories exist at the root. `.github/workflows/pr-ci.yml` is the pull-request install scaffold.
 
 ## 3. Frontend concerns (TypeScript, React, TanStack Start)
 
@@ -83,7 +83,7 @@ No `apps/`, `packages/`, or `.github/` directories exist at the root.
 ## 5. Tooling and CI
 
 - TypeScript / lint / format config: `tsconfig.json` (strict TypeScript; this is the only lint-like config). **No** ESLint, Prettier, or Biome files. **No** `lint` / `format` / `test` scripts in `package.json`. Also: `tsr.config.json`, `vite.config.ts`.
-- CI workflows (e.g. GitHub Actions): **not found** — no `.github/` directory.
+- CI workflows (e.g. GitHub Actions): `.github/workflows/pr-ci.yml` checks out the repo, sets up Node 24, and runs `npm ci`. Typecheck and build are not in that file yet.
 - Editor or agent config already present: `.vscode/settings.json`, `.cursorrules`, `AGENTS.md`, `.cta.json`
 - Scripts from package manifests that look like dev/build/test: `dev`, `build`, `preview`, `generate-routes` (no `test`)
 
