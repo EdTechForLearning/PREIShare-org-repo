@@ -1,72 +1,94 @@
-PREIshare semantic search — pgvector setup plan
-Goals and status
-Plan a safe, beginner-friendly Supabase PostgreSQL setup for a small PREIshare semantic-search demonstration. Property title and description will be combined and sent to an embedding model; its fixed-length numeric output will be stored in a separate embedding vector column. Later, a buyer query will be embedded using the same compatible model and compared with stored vectors to rank authorized properties.
+# PREIshare — Supabase pgvector setup plan
 
-Status: Planning only. No migration, live schema inspection, extension installation, embedding generation, or verification query is claimed as completed.
+## Goal and source of truth
 
-Source contract: [`embedding-data-model.md`](embedding-data-model.md). Its proposed logical fields are id, title, description, optional city, optional price, and embedding. The vector size remains DIMENSION_TODO. This is deliberately not executable SQL: choose an embedding model, confirm its output size, and replace the placeholder consistently before implementation. Do not assume these proposed names already exist in the deployed database.
-Decisions to confirm before writing a migration
-1. Inspect the actual deployed property table, primary key, owner/sponsor relationship, existing columns, and RLS policies. Earlier planning mentioned properties.owner_id versus property_listings.sponsor_id; neither is authoritative until verified.
-2. Choose whether to extend the existing RLS-protected property table or use a separately permissioned sample table. Do not duplicate or weaken ownership rules.
-3. Select the embedding provider and model; record its exact output dimension as the replacement for DIMENSION_TODO in the model, migration, and application helper.
-4. Confirm which sample listings may be visible to which users, how many samples to seed, and how to handle weak matches.
-Ordered setup and migration plan
-Order	Action	Why it happens in this order	Evidence to collect
-0	Inspect schema, RLS, sample-data permissions, and selected embedding model. Resolve DIMENSION_TODO before running SQL.	Avoids targeting a nonexistent table, selecting the wrong owner field, or declaring a vector length incompatible with the model.	Recorded actual table/column names, model, dimension, and policy review.
-1	Enable the PostgreSQL pgvector extension in the appropriate Supabase schema.	PostgreSQL must support the vector type and operators before the vector column or related search logic is created.	Extension appears in the database extension catalog.
-2	Create or alter the chosen property table while preserving its current identifiers and RLS. Ensure readable title and description are available; add a separate embedding vector column with the confirmed model dimension.	The storage location must exist before vectors can be written or compared. Existing sponsor access controls must survive the change.	Table and column inspection confirms the actual schema and correct vector size.
-3	Seed a small, permitted sample set and generate/backfill embeddings using the selected model. Embed title followed by a newline and description; use the same model for later buyer queries.	A search cannot rank meaningful examples until valid vectors are stored. Keep embedding nullable during backfill and exclude null vectors from ranking.	Counts of total samples, embedded samples, missing embeddings, and generation failures.
-4	Decide whether to add a vector index after testing exact search on the sample data.	Small demo datasets may not benefit from approximate indexing, which adds setup and tuning decisions.	Documented no-index decision or measured reason for an index.
-5	Run schema, access-control, and search verification queries; record results and failures.	Checks must run against the actual schema and populated vectors, not hypothetical columns.	Extension/column checks, null counts, authorized ranking tests, and cross-sponsor denial tests where applicable.
+Plan the **database migration only** for semantic search. This plan follows [embedding-data-model.md](embedding-data-model.md). The agreed tutorial contract is:
 
+| Item | Contract |
+| --- | --- |
+| Table | `properties` |
+| Unique property identifier | `id` (preserve the existing primary-key type and constraint) |
+| Readable listing text | `title` and `description` |
+| Vector column | `embedding` |
+| Planned vector size | **1536** numbers (`vector(1536)`) |
+| Initial embedding input, for later work | `title` + newline + `description` |
+| Optional display fields | `city`, `price` |
+| Ranking metric planned for later search | Cosine distance, `<=>`, ascending (smallest distance first) |
 
-Null embeddings, uniqueness, and refresh
-- id remains a stable unique property identifier; preserve the existing primary-key type and relationships.
-- title and description are nonempty for demo records. city and price are optional display fields, not part of the initial embedding input.
-- embedding may be NULL during initial seeding/backfill. Do not substitute a zero vector for a missing embedding.
-- After successful backfill, search-ready demo listings must have an embedding. Add database-wide NOT NULL only if every row in the chosen table must be search-ready and has been backfilled; otherwise enforce readiness for the demo subset.
-- If title or description changes, mark the stored vector stale and regenerate it before treating that record as search-ready.
-Similarity operator and ranking choice
-Proposed starting point: cosine distance, provided it is compatible with the selected model. In pgvector, the cosine-distance operator is <=>: smaller distance means a closer match, so rank ascending by distance. If the UI shows a derived similarity score such as 1 - cosine_distance, larger similarity means a closer match. Do not accidentally reverse the order.
+**Decision boundary:** 1536 is a **planned contract**, not a measured property of a selected provider. Before executing the migration, select and verify a model that outputs exactly 1536 values. If a different model is selected, revise **both** this plan and the data-model document together *before* running SQL. Do not silently use a different dimension.
 
-Tradeoffs to document before implementation:
-- Cosine distance: compares direction rather than raw magnitude; a reasonable starting option for many text-embedding models, but verify model guidance.
-- Euclidean/L2 distance: considers absolute numerical distance; rankings may differ when vector magnitudes differ.
-- Inner product: can be useful for normalized vectors or models that recommend it; operator and sort interpretation must be verified rather than assumed equivalent to cosine.
-For the first demo, choose one metric consistently across search queries, result labels, tests, and any future index operator class. This is a recommendation, not a finalized model-specific decision.
-Index recommendation for a small demo
-Start without an approximate vector index and use an exact scan for the small sample dataset. This makes results easier to inspect and avoids approximate-search tradeoffs. If the dataset or measured latency grows, evaluate an appropriate pgvector index (such as HNSW) and match its operator class to the chosen distance metric. Document any changes in recall, speed, index build cost, and maintenance. Do not add an index merely because pgvector is enabled.
-Environment variables and credential boundaries
-- Keep the Supabase project URL and browser-safe public/anon key in the project's existing public-client configuration only where required.
-- Keep embedding-provider credentials and any privileged Supabase server credential server-side; never place them in VITE_ client-exposed variables, browser bundles, screenshots, committed .env files, or this plan.
-- Use placeholder variable names, not real values, in setup documentation. Confirm the existing PREIshare environment-variable checklist and actual app conventions before naming or adding new variables.
-- A public/anon key is not a substitute for RLS. The similarity-search path must enforce the same authorization boundaries as ordinary property reads.
-Verification queries and expected observations (query goals, not full SQL)
-Check	Query or inspection goal	Expected observation
-Extension	Inspect installed PostgreSQL extensions for vector.	pgvector is installed in the intended database.
-Schema	Inspect the chosen table's primary key, title, description, embedding, and actual vector dimension.	Fields match the confirmed live schema and selected model dimension, replacing DIMENSION_TODO.
-Uniqueness	Check duplicate property IDs and primary-key constraints.	Each property has one stable unique identifier.
-Backfill	Count rows with null versus non-null embedding, and inspect vector lengths where supported.	Search-ready demo rows have non-null, correctly sized vectors; failures are recorded.
-Text composition	Inspect the input-building rule used by the embedding helper.	Each property vector represents title + newline + description, not city/price/id.
-Ranking	Embed a buyer query using the same model; compare it with stored vectors using the selected distance operator, order best first, and limit to top-K.	Waterfront, family, and downtown queries return meaningfully relevant eligible sample listings; record actual ranks rather than assuming them.
-Near-miss control	Search for large-scale farmland against a cabins/condos-only sample set.	The top result is not automatically called relevant; document whether a threshold or no-match state is needed.
-Authorization	Test as signed-out, Sponsor A, and Sponsor B where the live data model requires sponsor-specific visibility.	No private listings leak across accounts; a server-side search function does not bypass RLS.
-Secret hygiene	Review server/client imports, env handling, and compiled browser assets without exposing secret values.	No privileged credentials in browser assets or repository.
+**Existing schema caution:** `properties` is the target name for this tutorial. Prior PREIshare planning also mentions `property_listings` and different owner/sponsor identifiers. Inspect the deployed schema and existing Row Level Security (RLS) policies before altering anything. Do not rename an existing live table, replace its primary key, or bypass RLS merely to fit this plan. Resolve any mismatch explicitly before migration.
 
+## Ordered migration steps (goals, not executable SQL)
 
-Important: These are proposed verification checks, not evidence of passing tests. The actual SQL will be written after the schema, embedding model, and permissions are confirmed.
-Explicitly out of scope
-- Full SQL migrations, production application code, and final TypeScript search helpers in this planning document
-- Production-scale embedding jobs, billing/rate-limit operations, and large-scale index tuning
-- Map search, price/bedroom filters, hybrid ranking, personalization, payments, or messaging
-- New authentication features or any change that weakens existing RLS
-- Claims of guaranteed rental returns, school quality, or investment suitability
-Open questions and handoff
-1. What property table, owner field, and RLS policies actually exist in the deployed Supabase project?
-2. Which embedding model is selected, and what exact number replaces DIMENSION_TODO everywhere?
-3. Does the model recommend cosine distance, L2, or inner product?
-4. Are sample listings public, sponsor-restricted, or isolated in a demo table?
-5. How many sample properties and what top-K limit should be used?
-6. How will the UI distinguish a weak best-ranked result from a genuinely relevant match?
-7. Is any database-wide NOT NULL constraint safe after backfill, or only a search-ready subset rule?
-Next step: Confirm the live schema, embedding model, and access rules; then implement the migration in the documented order and attach actual verification output. Keep [`semantic-search-requirements.md`](semantic-search-requirements.md), [`embeddings-learner-notes.md`](embeddings-learner-notes.md), and [`vector-search-learner-notes.md`](vector-search-learner-notes.md) available when testing the example queries.
+| Order | Step | Why this order? | Verification evidence |
+| --- | --- | --- | --- |
+| 0 | Inspect the deployed schema and RLS. Confirm `properties`, its `id`, `title`, `description`, and existing ownership rules. Confirm the selected embedding model produces **1536** numbers. | Prevents modifying the wrong table or choosing an incompatible vector size. | Schema inspection and model-dimension confirmation recorded; stop if the contract differs. |
+| 1 | Enable the PostgreSQL `vector` extension (pgvector) in the Supabase database. | The vector data type and distance operators must exist before adding a vector column. | Extension catalog shows `vector` installed. |
+| 2 | Create or alter the agreed `properties` table as appropriate, preserving existing `id` uniqueness, ownership relationships, and RLS. Add a separate nullable `embedding` column of type `vector(1536)`. Keep `title` and `description` readable. | The extension must exist before the column can use its type. Nullable embeddings allow future backfill without breaking existing listings. | Schema inspection shows `properties.embedding` as `vector(1536)`; `id` remains unique; existing RLS remains enabled. |
+| 3 | **Optional:** consider a cosine-compatible vector index only if the demo dataset or measured performance justifies it. Default: **no approximate index** for a small sample. | Indexes depend on the existing vector column and chosen operator; a small demo is easier to validate with exact scans. | Record either “no index needed for demo” or the index name, operator class, and reason. |
+| 4 | Run schema-only verification queries and record the results. | Confirms the extension and table contract before any separate seeding or search work begins. | Results of the checks below, including any failures. |
+
+## Similarity operator choice and tradeoffs
+
+For a **later** query/search step, start with cosine distance (`<=>`) if the chosen embedding model supports it. **Smaller distance ranks better**, so order ascending. This is a planned choice, not an implemented SQL function.
+
+- **Cosine distance:** emphasizes direction/semantic orientation rather than vector magnitude; suitable as a starting candidate for text embeddings.
+- **L2/Euclidean distance:** compares absolute numerical distances; results can differ if vector magnitudes vary.
+- **Inner product:** may be recommended for certain normalized embedding models; its interpretation and operator class differ.
+
+Any future vector index must use an operator class compatible with the chosen metric. Do not add a search function or API in this migration step.
+
+## Index recommendation for the demo
+
+Start with **no HNSW or IVFFlat index** for a small sample set. Exact scans are simpler and make it easier to inspect ranking later. Revisit indexing only after observing actual data volume and query latency. If an index is justified, document its operator class (for cosine, `vector_cosine_ops`) and tradeoffs; it remains optional here.
+
+## Environment variable names (names only; no values)
+
+| Variable name | Intended use | Exposure boundary |
+| --- | --- | --- |
+| `SUPABASE_URL` | Supabase project endpoint for server-side setup/administration, if required by tooling | Server-side configuration |
+| `DATABASE_URL` | Database connection for authorized migrations, if that workflow is used | **Server-only**, never in browser code |
+| `SUPABASE_SECRET_KEY` | Privileged Supabase server credential if the existing project requires it | **Server-only**; do not use it as a substitute for database migration permissions |
+| `EMBEDDING_PROVIDER_API_KEY` | Future embedding generation (not used in this migration step) | **Server-only** |
+| `VITE_SUPABASE_URL` | Existing browser-safe Supabase endpoint naming, if used by the app | Public client configuration |
+| `VITE_SUPABASE_ANON_KEY` | Existing browser-safe public/anon key naming, if used by the app | Public client configuration, still subject to RLS |
+
+These are **variable names**, not credential values. Do not paste actual secrets into documentation, Git, or browser bundles. The actual migration tool may need only `DATABASE_URL` or a separately authenticated Supabase CLI session; do not require every variable merely because it appears here. Follow the existing project's environment-variable checklist.
+
+## Verification queries: goals and expected results
+
+These are **checks to run later**, not claims that the migration has executed:
+
+1. **Extension check:** query PostgreSQL's installed extensions catalog; expect extension `vector`.
+2. **Table check:** inspect the schema for table `properties`; expect it to exist as the agreed target, or stop and resolve the live-schema mismatch.
+3. **Column check:** inspect `properties.embedding`; expect pgvector type **`vector(1536)`**, nullable at this migration stage.
+4. **Text check:** inspect `properties.title` and `properties.description`; expect readable text fields, unchanged by the vector addition.
+5. **Identifier check:** inspect primary-key/unique constraints; expect stable, unique `properties.id` and no conflicting second identifier.
+6. **Access check:** inspect RLS enablement and existing policies; expect no broadened anonymous or cross-sponsor access as a side effect of the migration.
+7. **Optional index check:** inspect index definitions only if an index was created; expect a cosine-compatible operator class for cosine ranking.
+
+Record actual outputs and failures in the subsequent migration verification notes. No real vector rows or semantic-ranking results are required to pass this **schema-only** step.
+
+## Explicitly out of scope for this migration step
+
+- **Seeding sample property listings**, generating embeddings, or backfilling null embeddings
+- Embedding provider integration, model API calls, retries, and billing
+- SQL similarity search functions, `match_properties` helpers, ranking thresholds, and top-K implementation
+- **Search API routes, React search UI**, or end-to-end search tests
+- Map search, filters, payments, messaging, and production-scale vector tuning
+- Replacing or weakening existing authentication and RLS
+
+Those belong to later tutorials. Here the ordered work stops at **extension → vector column → optional index → schema verification**.
+
+## Handoff and completion checklist
+
+- [ ] Confirm the actual `properties` schema and preserve existing RLS.
+- [ ] Verify a chosen embedding model outputs **1536** values, or update both contract docs before migration.
+- [ ] Enable `vector` extension.
+- [ ] Add nullable `properties.embedding` as `vector(1536)` without changing ownership or `id` uniqueness.
+- [ ] Record the no-index decision (or justify a compatible index).
+- [ ] Run and record schema-only verification checks.
+- [ ] Keep seeding/backfill and UI/API implementation for later steps.
+
+**Status:** Documentation plan only. No migration or database verification is claimed complete.
