@@ -45,7 +45,7 @@ I am intentionally not editing application code while building this map.
 | `.cta.json` | config | TanStack CLI scaffold metadata | yes |
 | `.cursorrules` | config | Cursor rules for editing this codebase | yes |
 
-No `apps/` or `packages/` directories exist at the root. `.github/workflows/pr-ci.yml` installs dependencies, runs `npm run typecheck`, then `npm run build` on pull requests.
+No `apps/` or `packages/` directories exist at the root. `.github/workflows/pr-ci.yml` installs dependencies, then runs typecheck, build, lint, and test on pull requests.
 
 ## 3. Frontend concerns (TypeScript, React, TanStack Start)
 
@@ -83,7 +83,7 @@ No `apps/` or `packages/` directories exist at the root. `.github/workflows/pr-c
 ## 5. Tooling and CI
 
 - TypeScript / lint / format config: `tsconfig.json` (strict TypeScript; this is the only lint-like config). **No** ESLint, Prettier, or Biome files. **No** `lint` / `format` / `test` scripts in `package.json`. Also: `tsr.config.json`, `vite.config.ts`.
-- CI workflows (e.g. GitHub Actions): `.github/workflows/pr-ci.yml` checks out the repo, sets up Node 24, runs `npm ci`, then `npm run typecheck`, then `npm run build`. Lint and test are not in that file yet.
+- CI workflows (e.g. GitHub Actions): `.github/workflows/pr-ci.yml` checks out the repo, sets up Node 24, runs `npm ci`, then `npm run typecheck`, `npm run build`, `npm run lint`, and `npm run test`. Lint uses `tsc`. Test uses Node’s built-in runner.
 - Editor or agent config already present: `.vscode/settings.json`, `.cursorrules`, `AGENTS.md`, `.cta.json`
 - Scripts from package manifests that look like dev/build/test: `dev`, `build`, `preview`, `generate-routes` (no `test`)
 
