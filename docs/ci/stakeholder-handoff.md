@@ -149,6 +149,28 @@ PREIshare now has a pull-request workflow that installs dependencies, checks typ
 
 The topic 1 record above stays in force. Continuous integration is already done. The GitHub Actions workflow at `.github/workflows/pr-ci.yml` already installs, typechecks, builds, lints, and tests on pull requests. This section does not rebuild that workflow, the prompt pack, or the live site. It tells stakeholders how human review sits on top of that finished gate.
 
+### Decision log: why humans remain the approvers
+
+Approval and merge stay with the humans named in the roles file. Gonzalo Burga (`gonzaloburga-cs`) is the human reviewer and the maintainer who may merge. Those two jobs are the same person. A passing CI run cannot judge these four risks. The AI may comment. A person must decide.
+
+| Risk | Why a human must decide | Artifact that supports the person |
+| --- | --- | --- |
+| Sign-in | A sponsor signs in with email and password so only that person reaches their own dashboard. A change can pass the commands and still let the wrong person in. | Roles file and human-judgment checklist |
+| Money | Charges, payments, and money records are outside this dashboard work. An AI comment must not accept them. | Human-judgment checklist |
+| Privacy | The practice review planted a privacy mistake on purpose. The human judged the advisor notes with the checklist. The assistant did not approve or merge, and the sample stayed unmerged. | Checklist and critique file |
+| Product intent | A change can pass the commands and still drift from this purpose: PREIshare is the team's shared view of real-estate market information. | Overlay brief and checklist |
+
+### Sprint 7 next actions
+
+These items are already done and working. Do not list them as missing, unbuilt, or work to create.
+
+- The pull-request CI workflow is done and running. Do not rebuild `.github/workflows/pr-ci.yml`.
+- The AI review prompt pack, which is the system instruction, is done. Do not treat `docs/ci/ai-pr-review-prompts.md` as unwritten.
+- The existing Production site is already live on the current Vercel Hobby project at `https://prei-share-org-repo-chi.vercel.app`. Do not create a new hosting project. Later confirmation uses that same public URL.
+- Keep merge decisions with the humans named in the roles file. The AI remains an advisor.
+- On future pull requests, follow the runbook and the human checklist.
+- If the GitHub plan later allows a rule that is only documented today, apply it from the branch-protection checklist. Until then, leave that honest gap recorded. The gap does not mean CI was never built.
+
 ### What the AI review can and cannot do
 
 The AI review can:
@@ -201,28 +223,6 @@ The AI assistant is not a required approver and is not a required status check.
 ### Sample privacy pull request
 
 The practice pull request with one planted privacy mistake was not merged. The practice files stay under `docs/ci/samples/` for learning. They are not live member-facing code. Sprint 7 must not merge that sample.
-
-### Decision log: why humans remain the approvers
-
-Approval and merge stay with the humans named in the roles file. Gonzalo Burga (`gonzaloburga-cs`) is the human reviewer and the maintainer who may merge. Those two jobs are the same person. A passing CI run cannot judge these four risks. The AI may comment. A person must decide.
-
-| Risk | Why a human must decide | Artifact that supports the person |
-| --- | --- | --- |
-| Sign-in | A sponsor signs in with email and password so only that person reaches their own dashboard. A change can pass the commands and still let the wrong person in or show one sponsor another sponsor's dashboard. | Roles file and human-judgment checklist |
-| Money | Charges, payments, and money records, including a balance, a price, or a refund, are outside this dashboard work. An AI comment must not accept them. | Human-judgment checklist |
-| Privacy | The practice review planted a privacy mistake on purpose. `docs/ci/sample-pr-review/critique-and-prompt-revision.md` records that the human judged the advisor notes with the checklist, the assistant did not approve or merge, and the sample stayed unmerged. | Checklist and critique file |
-| Product intent | A change can pass the commands and still drift from this purpose: PREIshare is the team's shared view of real-estate market information. | Overlay brief and checklist |
-
-### Sprint 7 next actions
-
-These items are already done and working. Do not list them as missing, unbuilt, or work to create.
-
-- The pull-request CI workflow is done and running. Do not rebuild `.github/workflows/pr-ci.yml`.
-- The AI review prompt pack, which is the system instruction, is done. Do not treat `docs/ci/ai-pr-review-prompts.md` as unwritten.
-- The existing Production site is already live on the current Vercel Hobby project at `https://prei-share-org-repo-chi.vercel.app`. Do not create a new hosting project. Later confirmation uses that same public URL.
-- Keep merge decisions with the humans named in the roles file. The AI remains an advisor.
-- On future pull requests, follow the runbook and the human checklist.
-- If the GitHub plan later allows a rule that is only documented today, apply it from the branch-protection checklist. Until then, leave that honest gap recorded. The gap does not mean CI was never built.
 
 ### What stakeholders should remember
 
