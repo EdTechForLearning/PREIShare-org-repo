@@ -46,10 +46,10 @@
 - Advisor tool: chat assistant, new chat, not a coding agent
 - Same sample as the first review: yes
 - Answer key pasted into the chat: no
-- Output shape improved:
-- Privacy finding improved:
-- What is still wrong:
-- Number of re-runs:
+- Output shape improved: no. The headings stayed Review limits, Findings, and Not found.
+- Privacy finding improved: yes. It names the email and phone and quotes `memberEmail: member.email` and `memberPhone: member.phone`.
+- What is still wrong: nothing from the four checks remained wrong
+- Number of re-runs: 1
 
 ## Human stays in charge
 - I did not let the AI approve.
