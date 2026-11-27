@@ -9,7 +9,7 @@
 | --- | --- |
 | GitHub repository (you can push) | `https://github.com/jgbennett/PREIShare-org-repo` |
 | Instructor collaborator | `thortek` added: yes |
-| Vercel Production URL | `https://prei-share-org-repo-3wzqagost-john-bennetts-projects-417f5917.vercel.app` |
+| Vercel Production URL | `https://prei-share-org-repo-maude.vercel.app` |
 | Preview URLs | Do **not** submit these to Canvas |
 
 ## Hobby constraints I will keep
