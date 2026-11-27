@@ -10,26 +10,30 @@
 **Commit message:** `docs: add contributor entry for a small docs-only onboarding review`
 
 ## Problem
-PREIshare had no clear, reviewed onboarding contribution from this engineer yet.
-The team needs a small, low-risk change that proves the Git → review → merge path works
-for a new teammate without touching product runtime code.
+PREIshare had no contributor entry for this engineer. This small, documentation-only contribution adds one and gives the team a low-risk change to review without touching product runtime code.
 
 ## Approach
-- Added a personal entry to `CONTRIBUTORS.md` following the repo’s existing format.
-- Kept the change scoped to documentation only (no app, package, or config runtime edits).
-- Followed the plan in `docs/onboarding/first-contribution-plan.md` and implementation notes in
-  `docs/onboarding/first-contribution-notes.md`.
+- Added a one-row Markdown table to `CONTRIBUTORS.md` with the contributor's display name, GitHub username, date, and role.
+- Added the first-contribution plan and implementation notes, plus this PR description, as supporting onboarding documentation.
+- No application, package, or runtime configuration files are changed.
 
 ## What reviewers should look at
-- [ ] `CONTRIBUTORS.md` — new entry is accurate, formatted like neighbors, and free of secrets
-- [ ] Diff contains only intended files (no accidental `.env`, build output, or editor junk)
-- [ ] Commit message explains *why* this onboarding change exists
+- `CONTRIBUTORS.md` — verify the display name, GitHub username, date, and role.
+- Confirm the diff contains only these four intended files:
+  - `CONTRIBUTORS.md`
+  - `docs/onboarding/first-contribution-plan.md`
+  - `docs/onboarding/first-contribution-notes.md`
+  - `docs/onboarding/pr-description.md`
+- Review the commit messages: the main commit adds the contributor entry and onboarding docs; focused follow-ups record the PR URL, review-readiness checks, and this clarification.
 
 ## Test plan
-1. Open the Files changed tab and confirm only the expected path(s) appear.
-2. Skim `CONTRIBUTORS.md` in the PR diff: name/link/role lines render as valid Markdown.
-3. Search the diff for tokens, passwords, or local absolute paths — expect none.
-4. (Optional) Check out the branch locally and open `CONTRIBUTORS.md` in a Markdown preview.
+1. Compare the PR Files changed tab with the four intended paths listed above.
+2. Review `CONTRIBUTORS.md` as Markdown and verify the name, username, date, and role.
+3. Run `git diff --check` and scan the changed files for secrets, `.env` values, and machine-specific paths.
+4. No application tests were run: this contribution changes documentation only and does not affect runtime behavior.
+
+## Risk
+The main risk is inaccurate contributor or onboarding information. The entry is checked against the plan, and reviewers can verify each changed path; no application behavior or runtime configuration is changed.
 
 ## Screenshots / notes
 No UI screenshots (docs-only change).
