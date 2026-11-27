@@ -7,45 +7,43 @@
 - Related files: `CONTRIBUTORS.md`, `docs/onboarding/first-contribution-plan.md`, `docs/onboarding/first-contribution-notes.md`, `docs/onboarding/pr-description.md`
 
 ## Simulated reviewer setup
-- Tool used: Copilot SDK in VS Code (agent self-review; no external reviewer simulation)
+- Tool used: Copilot SDK in VS Code, simulating a PREIshare mentor review
 - Context reviewed: PR description, contributor table, implementation notes, branch diff, and PR metadata
-- Date of simulation: Not simulated; external reviewer feedback was not available as of 2026-11-26
+- Date of simulation: 2026-11-26
 
-## Feedback received
-
-No external reviewer comments were received. The following are internal observations from the agent's skim, not reviewer comments; each decision is recorded for transparency.
+## Simulated mentor comments
 
 ### Comment 1
 - **Theme:** scope and verification
-- **Blocking?:** no (internal observation)
-- **Reviewer said:** Not received. Self-review observation: the description did not list the exact expected paths or explicitly state that no application tests were run.
+- **Blocking?:** yes
+- **Reviewer said:** “I can’t verify the scope from ‘expected paths.’ Please name every changed file and say whether you ran application tests; otherwise I can’t assess what this PR changes.”
 - **My decision:** accept-now
-- **Why:** An exact file list and an honest test statement make the docs-only change easier to assess.
-- **Action taken:** Updated `docs/onboarding/pr-description.md` to list all four paths, state the manual/format checks, and clarify that no application tests were run.
-- **Evidence:** Follow-up commit `2e7422d`; the live PR description has matching scope and verification sections.
+- **Why:** A precise file list and transparent test status are needed to review this beginner docs-only contribution.
+- **Action taken:** Updated `docs/onboarding/pr-description.md` with the four exact paths and stated that no application tests were run because runtime code is unchanged.
+- **Evidence:** PR text: “Confirm the diff contains only these four intended files” and “No application tests were run: this contribution changes documentation only and does not affect runtime behavior.” Follow-up commit: `2e7422d`.
 
 ### Comment 2
 - **Theme:** PR clarity
-- **Blocking?:** no (internal observation)
-- **Reviewer said:** Not received. Self-review observation: “name/link/role” did not accurately describe the plain-text username and one-row table in `CONTRIBUTORS.md`.
+- **Blocking?:** no
+- **Reviewer said:** “The roster has a plain-text GitHub username and no neighboring entries to compare against. Please make the review request match the actual table fields instead of asking for a link and neighbor formatting.”
 - **My decision:** accept-now
 - **Why:** The review criteria should match the actual contributor entry.
 - **Action taken:** Changed the reviewer instructions to verify display name, GitHub username, date, and role.
-- **Evidence:** Follow-up commit `2e7422d`; both the local PR description and live PR body use the accurate criteria.
+- **Evidence:** PR text: “verify the display name, GitHub username, date, and role.” Follow-up commit: `2e7422d`.
 
 ### Comment 3
 - **Theme:** commit/message hygiene
-- **Blocking?:** no (internal observation)
-- **Reviewer said:** Not received. Self-review observation: the PR description named the main contribution commit but did not explain the supporting follow-ups.
+- **Blocking?:** no
+- **Reviewer said:** “There are several follow-up commits after the roster change. Please explain their purpose in the PR so I can tell they are deliberate documentation updates, not unrelated scope.”
 - **My decision:** accept-now
 - **Why:** A short explanation makes the commit sequence easier to understand without rewriting history.
 - **Action taken:** Added a commit-history summary and used a focused message for the PR-description update.
-- **Evidence:** Commit `2e7422d` is `docs: clarify review scope and verification for first contribution`; the live PR description summarizes the follow-ups.
+- **Evidence:** PR text: “Focused follow-up commits record the PR URL and readiness checks, then clarify review scope and verification.” Commit `2e7422d`: `docs: clarify review scope and verification for first contribution`.
 
 ## Follow-up commits
 | Commit message | Files touched | Addresses which comment # |
 | --- | --- | --- |
-| `docs: clarify review scope and verification for first contribution` | `docs/onboarding/pr-description.md` | Internal observations 1–3 |
+| `docs: clarify review scope and verification for first contribution` | `docs/onboarding/pr-description.md` | Simulated comments 1–3 |
 
 ## PR description edits
 - Sections changed: summary/problem, approach, reviewer focus, test plan, risk, and commit history.
@@ -59,12 +57,12 @@ No external reviewer comments were received. The following are internal observat
 - [x] No credential-like strings, emails, or machine-specific paths found in the four changed files
 - [x] `git diff --check upstream/main...HEAD` passes
 - [x] No application tests are claimed; they were not run because no runtime code changed
-- [x] No blocking external comments are outstanding; internal non-blocking observations were addressed
+- [x] The simulated blocking comment has a concrete fix; the two simulated non-blocking comments are addressed
 
 ## Merge-readiness statement
 
 The PR is ready for mentor review from a documentation and scope perspective. GitHub confirms the PR targets `EdTechForLearning/PREIShare-org-repo:main`, has the expected four documentation paths, and points to the pushed feature branch. `git diff --check` passes, and the changed files were scanned for credential-like strings, emails, and machine-local paths. No application tests were run because the change does not affect runtime behavior; a human mentor should verify the contributor details and onboarding guidance.
 
 ## What I learned about review culture
-- One habit I will keep: distinguish actual reviewer feedback from my own review observations and list concrete verification steps.
-- One mistake I will avoid next time: describing a possible concern as if it were feedback received from a reviewer.
+- One habit I will keep: label simulated review feedback as simulated and support decisions with concrete changes or checks.
+- One mistake I will avoid next time: leave the reviewer-voice comment fields blank when conducting a practice review.
