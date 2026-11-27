@@ -37,7 +37,7 @@ No UI screenshots (docs-only change).
 Implementation decisions and verification notes: see `docs/onboarding/first-contribution-notes.md`.
 
 ## Checklist before requesting review
-- [ ] Feature branch is pushed and up to date with this description
-- [ ] PR title is specific (not “update” or “fixes”)
-- [ ] Description states problem, approach, and test plan
+- [x] Feature branch is pushed and up to date with this description
+- [x] PR title is specific (not “update” or “fixes”)
+- [x] Description states problem, approach, and test plan
 - [ ] I can explain every staged line if a reviewer asks
